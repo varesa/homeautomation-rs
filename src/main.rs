@@ -24,6 +24,18 @@ async fn handle(
         return;
     }
 
+    if state == "arrow_left_click" {
+        hass.service("input_boolean", "turn_off", "input_boolean.combine_lights")
+            .await;
+        return;
+    }
+
+    if state == "arrow_right_click" {
+        hass.service("input_boolean", "turn_on", "input_boolean.combine_lights")
+            .await;
+        return;
+    }
+
     let switch_to_light: HashMap<&str, &str> = [
         ("valokatkaisijat_etu", "light.z_valot_etu"),
         ("valokatkaisijat_taka", "light.z_valot_taka"),
@@ -40,7 +52,11 @@ async fn handle(
         vec![&switch_to_light[entity]]
     };
 
-    let service = if state == "on" { "turn_on" } else { "turn_off" };
+    let service = match state {
+        "on" | "brightness_up_click" => "turn_on",
+        "off" | "brightness_down_click" => "turn_off",
+        _ => return,
+    };
     for target in targets {
         hass.service("light", service, target).await;
     }
