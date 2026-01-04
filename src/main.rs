@@ -37,8 +37,8 @@ async fn handle(
     }
 
     let switch_to_light: HashMap<&str, &str> = [
-        ("valokatkaisijat_etu", "light.z_valot_etu"),
-        ("valokatkaisijat_taka", "light.z_valot_taka"),
+        ("valokatkaisijat_etu", "light.valot_etu"),
+        ("valokatkaisijat_taka", "light.valot_taka"),
     ]
     .into();
 
