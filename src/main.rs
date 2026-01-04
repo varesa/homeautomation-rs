@@ -11,7 +11,11 @@ fn handle(entity: &str, state: &str, retain: bool, combine_lights: &mut bool) {
 
 #[tokio::main]
 async fn main() {
-    let mut mqttoptions = MqttOptions::new("homeautomation-rs", "mqtt.apps.okd.p4.esav.fi", 1883);
+    let mut mqttoptions = MqttOptions::new(
+        "homeautomation-rs",
+        std::env::var("MQTT_HOST").expect("Missing MQTT_HOST environment variable"),
+        1883,
+    );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
