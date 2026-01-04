@@ -1,4 +1,5 @@
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
+use std::collections::HashMap;
 use std::time::Duration;
 
 fn entity_name(topic: &str) -> String {
@@ -52,15 +53,37 @@ impl HomeAssistant {
 async fn handle(
     entity: &str,
     state: &str,
-    _retain: bool,
-    _combine_lights: &mut bool,
+    is_retained: bool,
+    combine_lights: &mut bool,
     hass: &HomeAssistant,
 ) {
     println!("Entity: {}, State: {}", entity, state);
 
-    if entity == "valokatkaisijat_etu" || entity == "valokatkaisijat_taka" {
-        let service = if state == "on" { "turn_on" } else { "turn_off" };
-        hass.service("light", service, "light.z_valot_etu").await;
+    if entity == "combine_lights" {
+        *combine_lights = state == "on";
+        println!("combine_lights = {}", combine_lights);
+        return;
+    }
+
+    let switch_to_light: HashMap<&str, &str> = [
+        ("valokatkaisijat_etu", "light.z_valot_etu"),
+        ("valokatkaisijat_taka", "light.z_valot_taka"),
+    ]
+    .into();
+
+    if !switch_to_light.contains_key(entity) || is_retained {
+        return;
+    }
+
+    let targets = if *combine_lights {
+        switch_to_light.values().collect()
+    } else {
+        vec![&switch_to_light[entity]]
+    };
+
+    let service = if state == "on" { "turn_on" } else { "turn_off" };
+    for target in targets {
+        hass.service("light", service, target).await;
     }
 }
 
