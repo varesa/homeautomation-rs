@@ -68,11 +68,12 @@ async fn main() {
     let hass_token = std::env::var("HASS_TOKEN").expect("Missing HASS_TOKEN environment variable");
 
     let mut mqttoptions = MqttOptions::new(
-        "homeautomation-rs",
+        format!("homeautomation-rs-{}", random_string::generate(6, random_string::charsets::ALPHANUMERIC)),
         std::env::var("MQTT_HOST").expect("Missing MQTT_HOST environment variable"),
         1883,
     );
     mqttoptions.set_keep_alive(Duration::from_secs(5));
+    mqttoptions.set_clean_session(false);
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     let hass = HomeAssistant::new(hass_url, hass_token);
