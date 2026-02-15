@@ -68,7 +68,7 @@ async fn main() {
     let hass_token = std::env::var("HASS_TOKEN").expect("Missing HASS_TOKEN environment variable");
 
     let mut mqttoptions = MqttOptions::new(
-        format!("homeautomation-rs-{}", random_string::generate(6, random_string::charsets::ALPHANUMERIC)),
+        format!("homeautomation-rs-{}", random_string::generate(4, random_string::charsets::ALPHANUMERIC)),
         std::env::var("MQTT_HOST").expect("Missing MQTT_HOST environment variable"),
         1883,
     );
