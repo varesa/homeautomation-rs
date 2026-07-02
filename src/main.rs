@@ -72,8 +72,7 @@ async fn main() {
         std::env::var("MQTT_HOST").expect("Missing MQTT_HOST environment variable"),
         1883,
     );
-    mqttoptions.set_keep_alive(Duration::from_secs(5));
-    mqttoptions.set_clean_session(false);
+    mqttoptions.set_keep_alive(Duration::from_secs(30));
 
     let (client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
     let hass = HomeAssistant::new(hass_url, hass_token);
@@ -85,8 +84,6 @@ async fn main() {
     ]
     .map(|topic| SubscribeFilter::new(topic.to_string(), QoS::AtMostOnce))
     .to_vec();
-
-    client.try_subscribe_many(topics).unwrap();
 
     let mut combine_lights = false;
 
@@ -103,6 +100,9 @@ async fn main() {
                     &hass,
                 )
                 .await;
+            }
+            Ok(Event::Incoming(Packet::ConnAck(_))) => {
+                client.try_subscribe_many(topics.clone()).unwrap();
             }
             Ok(_) => {}
             Err(e) => {
